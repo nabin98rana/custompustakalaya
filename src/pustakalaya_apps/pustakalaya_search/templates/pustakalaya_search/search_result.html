@@ -71,14 +71,6 @@
             margin-bottom: 10px;
         }
 
-        h1 {
-            font-weight: normal;
-            font-size: 1.9em;
-            /*line-height: 2.0em; **/
-            color: #545454;
-            letter-spacing: -0.04em;
-        }
-
         /** containers **/
         #wrap {
             width: 100%;
@@ -474,11 +466,11 @@
 
                 <div>
                     <!-- include search form -->
-                    <form method="GET" action="." id="searchForm">
+                    <form method="GET" action="/search" id="searchForm">
 
                         <div class="input-group">
                             <input class="form-control" id="search_input"
-                                   autocomplete="on"
+                                   autocomplete="off"
                                    maxlength="200"
                                    value="{{ q }}"
                                    type="text" name="q" , placeholder="Search pustakalaya.."/>
@@ -601,14 +593,7 @@
                     <div class="col-md-2"></div>
                     <div class=" col-md-8 search">
                         <p class="text-capitalize text-danger text-center">{% trans "result not found" %}</p>
-                        <form action="/search" method="GET">
-                            <div class="input-group">
-                                <input class="form-control border-right-0" type="search" name="q" value=""
-                                       placeholder="{% trans 'Search pustakalaya' %}">
-                                <button class="input-group-addon pl-3 pr-3"
-                                        id="search-icon">{% trans "Search" %}</button>
-                            </div>
-                        </form>
+                        {%  include "_partials/search_form.html" %}
 
                     </div>
                     <div class="col-md-2"></div>
@@ -619,6 +604,7 @@
         {% endif %}
         </div>
 
+    </div>
     </div>
 
 {% endblock content %}
@@ -734,7 +720,6 @@
             }
         });
     </script>
-
     <!--Grid view and list view-->
     <script>
         $(document).ready(function () {
