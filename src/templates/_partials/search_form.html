@@ -1,13 +1,6 @@
 {% load i18n %}
 <form action="/search" method="GET" id="searchForm">
     <div class="input-group">
-
-        {#        <select class="custom-select">#}
-        {#            <option selected value=" ">All</option>#}
-        {#            <option value="document">Documents</option>#}
-        {#            <option value="audio">Audio</option>#}
-        {#            <option value="video">Video</option>#}
-        {#        </select>#}
         <input class="form-control border-right-0"
                id="searchFormInput"
                value="{{ q }}"
@@ -16,14 +9,10 @@
                autocomplete="off"
                placeholder="{% trans 'Search pustakalaya' %}">
         <!-- hidden type is very important don't remove it -->
-                            <input type="hidden" id="filterData"
-                                   name="form-filter"/>
+        <input type="hidden" id="filterData"
+               name="form-filter"/>
 
-
-         <input type="submit" value="Search" class="input-group-addon pr-1" id="search-icon"/>
-
-
-
+        <input type="submit" value="Search" class="input-group-addon pr-1" id="search-icon"/>
     </div>
     <ul class="list-group" id="suggestions">
 
