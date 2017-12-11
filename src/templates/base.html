@@ -19,6 +19,7 @@
 
 
 
+
         <!-- CSS Files -->
         {# {% include '_partials/css.html' %}#}
             <link rel="stylesheet" href="{% static 'base_assets/css/base.css' %}" type="text/css">
@@ -30,6 +31,7 @@
         <!-- TODO: CSS Just for demo purpose, don't include it in your project -->
         <link rel="stylesheet" href="{% static 'base_assets/css/pustakalaya.css' %}">
         <script type="text/javascript" src="{% static 'star-ratings/js/dist/star-ratings.min.js' %}"></script>
+
 
     {% endblock style %}
 {% google_analytics %}
@@ -64,6 +66,9 @@
             }
         }
     </script>
+
+     <!-- jquery ui -->
+         <script src = "https://code.jquery.com/ui/1.10.4/jquery-ui.js" defer></script>
 {% endblock script %}
 
 
