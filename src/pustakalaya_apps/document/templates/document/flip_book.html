@@ -7,7 +7,6 @@
     <style type="text/css">
 
         body {
-            overflow: hidden;
             background-color: #fcfcfc;
             margin: 0;
             padding: 0;
@@ -433,102 +432,6 @@
     <script src="{% static 'base_assets/js/core/turnjs/zoom.min.js' %}"></script>
     <script src="{% static 'base_assets/js/core/turnjs/magazine.js' %}"></script>
 
-    {% comment %}
-        <script type="text/javascript">
-
-            $(window).ready(function () {
-
-                console.log(flipBookURL);
-                $('#magazine').turn({
-
-                    pages: 11,
-                    display: 'double',
-                    acceleration: true,
-                    gradients: !$.isTouch,
-                    elevation: 50,
-                    width: 922,
-                    height: 600,
-                    autoCenter: true,
-                    inclination: 20,
-                    when: {
-                        turned: function (e, page) {
-                            /*console.log('Current view: ', $(this).turn('view'));*/
-                        }
-                    }
-                });
-            });
-
-
-            $('#magazine').bind('turning', function (e, page) {
-                var range = $(this).turn('range', page);
-                for (page = range[0]; page <= range[1]; page++)
-                    addPage(page, $(this));
-            });
-
-
-            // define add page function add page to dynamically.
-            function addPage(page, book) {
-                // Check if the page is not in the book
-                if (!book.turn('hasPage', page)) {
-                    // Create an element for this page
-                    var element = $('<div />', {}).html('');
-                    // Add the page
-                    book.turn('addPage', element, page);
-
-                    if (book.turn('addPage', element, page)) {
-                        element.html('<div class="gradient"></div><div class="loader"></div>');
-                        loadPage(page);
-                    }
-
-
-                    // Get the data for this page
-                    $.ajax({
-                        url: flipBookURL
-                    })
-                        .done(function (data) {
-                            // Loop through the data and grab the page index
-                            // TODO: remove this http://192.168.5.67:9000/ in production.
-                            console.log(data)
-                            var imageSrc = data.page_urls[0];
-
-                            var imageElement = $("<img></img>", {
-                                src: imageSrc,
-                                alt: data.title,
-                                class: "img img-responsive"
-                            })
-
-
-                            element.attr("style", "background-image:url(" + imageSrc + ")")
-                        });
-                }
-            }
-
-
-            function loadPage(page) {
-
-                var img = $('<img />');
-                img.load(function () {
-                    var container = $('.magazine1 .p' + page);
-                    img.css({width: '100%', height: '100%'});
-                    img.appendTo($('.magazine1 .p' + page));
-                    container.find('.loader').remove();
-                });
-
-                img.attr('src', samplePath + 'pages/' + page + '.jpg');
-
-            }
-
-
-            $(window).bind('keydown', function (e) {
-
-                if (e.keyCode == 37)
-                    $('#magazine').turn('previous');
-                else if (e.keyCode == 39)
-                    $('#magazine').turn('next');
-
-            });
-        </script>
-    {% endcomment %}
 
     <script type="text/javascript">
         function loadApp() {
