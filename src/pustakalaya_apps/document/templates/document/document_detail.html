@@ -44,9 +44,9 @@
                            class="btn w-100 btn-primary btn-sm">Read: {{ document.file_name }}</a>
 
 
-
-                        <a class="btn btn-primary" href="{% url 'document:flipbook' %}">Read</a>
-
+                        {% if document.total_pages >= 1 %}
+                        <a class="btn btn-primary" href="{% url 'document:flipbook' document.pk %}">Read</a>
+                        {% endif %}
 
 
                         {# TODO: Calculate the file size and display in frontend #}
