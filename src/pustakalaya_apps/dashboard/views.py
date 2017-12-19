@@ -3,6 +3,9 @@ from django.views.generic.edit import UpdateView, CreateView, DeleteView
 from pustakalaya_apps.pustakalaya_account.models import UserProfile
 from pustakalaya_apps.document.models import Document
 from django.core.urlresolvers import reverse_lazy
+from django.contrib.auth.decorators import login_required
+
+@login_required()
 def dashboard(request):
     return render(request, "dashboard/dashboard_base.html")
 

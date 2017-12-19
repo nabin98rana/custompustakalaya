@@ -24,25 +24,14 @@
 
         }
 
-        #magazine{
-
-      -webkit-transition:margin-left 0.2s ease-in-out;
-      -moz-transition:margin-left 0.2s ease-in-out;
-      -o-transition:margin-left 0.2s ease-in-out;
-      -ms-transition:margin-left 0.2s ease-in-out;
-      transition:margin-left 0.2s ease-in-out;
-    }
-    #magazine .turn-page{
-      background-color:#ccc;
-      background-size:100% 100%;
-    }
-
     </style>
+
+
 {% endblock style %}
 
 {% block content %}
     <div>
-        <div class="container min_height pt-4">
+        <div class="container  pt-4">
             <div class="row">
 
                 <div class="col-md-3 col-sm-12  col-xs-12">
@@ -54,15 +43,15 @@
                         <a href="{{ MEDIA_URL }}{{ document.upload }}" role="button"
                            class="btn w-100 btn-primary btn-sm">Read: {{ document.file_name }}</a>
 
-                        <!--Modal for flipping book-->
-                        <!-- Button trigger modal -->
-                        <!-- Large modal -->
-                        <button class="btn btn-primary" data-toggle="modal" data-target=".bd-example-modal-lg">Read
-                        </button>
 
 
-                         {# TODO: Calculate the file size and display in frontend #}
-                    <p class="text-muted text-center">{%  trans "File size:" %}{{ document.upload.size | file_size_format}}</p>
+                        <a class="btn btn-primary" href="{% url 'document:flipbook' %}">Read</a>
+
+
+
+                        {# TODO: Calculate the file size and display in frontend #}
+                        <p class="text-muted text-center">
+                            {% trans "File size:" %}{{ document.upload.size | file_size_format }}</p>
                     {% endfor %}
 
                     <!-- show count -->
@@ -364,368 +353,28 @@
                     </div>
                 </div>
             </div>
-        <!--modal large for flip book-->
-        <div class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel"
-             aria-hidden="true">
-            <div class="modal-dialog modal-lg">
-                <p class="text-primary">{{ object.title }}</p>
-                <div class="modal-content">
-                    <div id="magazine" style="margin: 0 auto;">
-
-                        <div style="background-image:url('http://placehold.it/600x800');">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Accusamus accusantium animi beatae culpa eos impedit, modi, placeat quis recusandae repellat sed tempore. Autem consequatur ducimus molestias nobis quasi ut voluptates!</div>
-
-                    {% comment %}
-                        {% for img_url in ebook.get_files %}
-                            <div style="background-image:url('{{ MEDIA_URL }}{{ img_url }}');"></div>
-                        {% endfor %}
-                    {% endcomment %}
-
-                    </div>
-                </div>
-            </div>
-        </div>
         </div>
     </div>
+   </div>
+
 {% endblock content %}
 
-{% block script %}
-    {{ block.super }}
-    <script src="http://www.turnjs.com/extras/modernizr.2.5.3.min.js" charset="utf-8"></script>
-    <script src="http://www.turnjs.com/extras/jquery.mousewheel.min.js" charset="utf-8"></script>
-    <script src="http://www.turnjs.com/samples/magazine/js/magazine.js" charset="utf-8"></script>
-    <script type="text/javascript">
 
-        function loadApp() {
 
-            $('#all').fadeIn(1000);
 
 
-            // Create the flipbook
 
-            $('.magazine').turn({
 
-                // Magazine width
 
-                width: 922,
 
-                // Magazine height
 
-                height: 600,
 
-                // Elevation will move the peeling corner this number of pixels by default
 
-                elevation: 50,
 
-                // Hardware acceleration
 
-                acceleration: !isChrome(),
 
-                // Enables gradients
 
-                gradients: true,
 
-                // Auto center this flipbook
 
-                autoCenter: true,
 
-                // The number of pages
 
-                pages: 12,
-
-
-                // Events
-                when: {
-
-                    turning: function (event, page, view) {
-
-                        var book = $(this),
-                            currentPage = book.turn('page'),
-                            pages = book.turn('pages');
-
-                        // Update the current URI
-
-                        Hash.go('page/' + page).update();
-
-
-                        // Show and hide navigation buttons
-
-                        disableControls(page);
-
-
-                        $('.thumbnails .page-' + currentPage).parent().removeClass('current');
-
-                        $('.thumbnails .page-' + page).parent().addClass('current');
-
-                    },
-
-                    turned: function (event, page, view) {
-
-                        disableControls(page);
-
-                        $(this).turn('center');
-
-                        if (page == 1) {
-                            $(this).turn('peel', 'br');
-                        }
-
-                    },
-
-                    missing: function (event, pages) {
-
-                        // Add pages that aren't in the magazine
-
-                        for (var i = 0; i < pages.length; i++)
-                            addPage(pages[i], $(this));
-
-                    }
-                }
-
-            });
-
-            // Zoom.js
-
-            $('.magazine-viewport').zoom({
-                flipbook: $('.magazine'),
-                max: function () {
-
-                    return largeMagazineWidth() / $('.magazine').width();
-
-                },
-                when: {
-                    tap: function (event) {
-
-                        if ($(this).zoom('value') == 1) {
-                            $('.magazine').removeClass('animated').addClass('zoom-in');
-                            $(this).zoom('zoomIn', event);
-                        } else {
-                            $(this).zoom('zoomOut');
-                        }
-                    },
-
-                    resize: function (event, scale, page, pageElement) {
-
-                        if (scale == 1)
-                            loadSmallPage(page, pageElement);
-                        else
-                            loadLargePage(page, pageElement);
-
-                    },
-
-                    zoomIn: function () {
-
-                        $('.thumbnails').hide();
-                        $('.made').hide();
-                        $('.magazine').addClass('zoom-in');
-
-                        if (!window.escTip && !$.isTouch) {
-                            escTip = true;
-
-                            $('<div />', {'class': 'esc'}).html('<div>Press ESC to exit</div>').appendTo($('body')).delay(2000).animate({opacity: 0}, 500, function () {
-                                $(this).remove();
-                            });
-                        }
-                    },
-
-                    zoomOut: function () {
-
-                        $('.esc').hide();
-                        $('.thumbnails').fadeIn();
-                        $('.made').fadeIn();
-
-                        setTimeout(function () {
-                            $('.magazine').addClass('animated').removeClass('zoom-in');
-                            resizeViewport();
-                        }, 0);
-
-                    },
-
-                    swipeLeft: function () {
-
-                        $('.magazine').turn('next');
-
-                    },
-
-                    swipeRight: function () {
-
-                        $('.magazine').turn('previous');
-
-                    }
-                }
-            });
-
-            // Using arrow keys to turn the page
-
-            $(document).keydown(function (e) {
-
-                var previous = 37, next = 39, esc = 27;
-
-                switch (e.keyCode) {
-                    case previous:
-
-                        // left arrow
-                        $('.magazine').turn('previous');
-                        e.preventDefault();
-
-                        break;
-                    case next:
-
-                        //right arrow
-                        $('.magazine').turn('next');
-                        e.preventDefault();
-
-                        break;
-                    case esc:
-
-                        $('.magazine-viewport').zoom('zoomOut');
-                        e.preventDefault();
-
-                        break;
-                }
-            });
-
-            // URIs - Format #/page/1
-
-            Hash.on('^page\/([0-9]*)$', {
-                yep: function (path, parts) {
-                    var page = parts[1];
-
-                    if (page !== undefined) {
-                        if ($('.magazine').turn('is'))
-                            $('.magazine').turn('page', page);
-                    }
-
-                },
-                nop: function (path) {
-
-                    if ($('.magazine').turn('is'))
-                        $('.magazine').turn('page', 1);
-                }
-            });
-
-
-            $(window).resize(function () {
-                resizeViewport();
-            }).bind('orientationchange', function () {
-                resizeViewport();
-            });
-
-            // Events for thumbnails
-
-            $('.thumbnails').click(function (event) {
-
-                var page;
-
-                if (event.target && (page = /page-([0-9]+)/.exec($(event.target).attr('class')))) {
-
-                    $('.magazine').turn('page', page[1]);
-                }
-            });
-
-            $('.thumbnails li').bind($.mouseEvents.over, function () {
-
-                $(this).addClass('thumb-hover');
-
-            }).bind($.mouseEvents.out, function () {
-
-                $(this).removeClass('thumb-hover');
-
-            });
-
-            if ($.isTouch) {
-
-                $('.thumbnails').addClass('thumbanils-touch').bind($.mouseEvents.move, function (event) {
-                    event.preventDefault();
-                });
-
-            } else {
-
-                $('.thumbnails ul').mouseover(function () {
-
-                    $('.thumbnails').addClass('thumbnails-hover');
-
-                }).mousedown(function () {
-
-                    return false;
-
-                }).mouseout(function () {
-
-                    $('.thumbnails').removeClass('thumbnails-hover');
-
-                });
-
-            }
-
-
-            // Regions
-
-            if ($.isTouch) {
-                $('.magazine').bind('touchstart', regionClick);
-            } else {
-                $('.magazine').click(regionClick);
-            }
-
-            // Events for the next button
-
-            $('.next-button').bind($.mouseEvents.over, function () {
-
-                $(this).addClass('next-button-hover');
-
-            }).bind($.mouseEvents.out, function () {
-
-                $(this).removeClass('next-button-hover');
-
-            }).bind($.mouseEvents.down, function () {
-
-                $(this).addClass('next-button-down');
-
-            }).bind($.mouseEvents.up, function () {
-
-                $(this).removeClass('next-button-down');
-
-            }).click(function () {
-
-                $('.magazine').turn('next');
-
-            });
-
-            // Events for the next button
-
-            $('.previous-button').bind($.mouseEvents.over, function () {
-
-                $(this).addClass('previous-button-hover');
-
-            }).bind($.mouseEvents.out, function () {
-
-                $(this).removeClass('previous-button-hover');
-
-            }).bind($.mouseEvents.down, function () {
-
-                $(this).addClass('previous-button-down');
-
-            }).bind($.mouseEvents.up, function () {
-
-                $(this).removeClass('previous-button-down');
-
-            }).click(function () {
-
-                $('.magazine').turn('previous');
-
-            });
-
-
-            resizeViewport();
-
-            $('.magazine').addClass('animated');
-
-        }
-
-
-        $('#all').hide();
-
-
-        // Load the HTML4 version if there's not CSS transform
-
-
-    </script>
-
-{% endblock script %}
