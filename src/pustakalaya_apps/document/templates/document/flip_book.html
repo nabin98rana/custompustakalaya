@@ -496,6 +496,7 @@
                                 // Loop through the data and grab the page index
                                 var imageSrc = data.page_urls[page];
 
+
                                 var imageElement = $("<img></img>", {
                                     src: imageSrc,
                                     alt: data.title,
@@ -881,6 +882,7 @@
 
                 }).done(function (data) {
                     // Loop through the data and grab the page index
+
 
                     var imageSrc = data.page_urls[page - 1];
 
