@@ -300,7 +300,7 @@ class DocumentFileUpload(AbstractTimeStampModel):
         images = []
         for i in range(self.total_pages):
             path, file_name = os.path.split(self.upload.url)
-            images.append("{}/{}.png".format(path,i))
+            images.append("{}/{}.png".format(path,i+1))
 
         return  images
 
