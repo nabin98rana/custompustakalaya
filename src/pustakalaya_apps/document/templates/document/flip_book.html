@@ -436,7 +436,28 @@
 
 
     <script type="text/javascript">
-        function loadApp() {
+     // set the total page length
+        (function (window) {
+            // Set initial value
+             window.flipBookPageLength = 300;
+            $.ajax({
+                url: flipBookURL,
+                success: function (data) {
+                    window.flipBookPageLength =  data.page_urls.length || 300;
+
+                },
+                error: function (error) {
+                    window.flipBookPageLength = 0;
+
+                }
+            })
+
+        })(window);
+
+
+
+       $(document).ready(function () {
+           function loadApp() {
             var flipbook = $('.magazine');
 
             // Check if the CSS was already loaded
@@ -497,7 +518,7 @@
                                 })
 
 
-                                element.attr("style", "background-image:url(" + imageSrc + ")")
+                               // element.attr("style", "background-image:url(" + imageSrc + ")")
 
 
                                 var book = $(this),
@@ -826,23 +847,7 @@
             both: ['{% static 'base_assets/js/core/extras/zoom.min.js' %}'],
             complete: loadApp
         });
-
-        // set the total page length
-        (function (window) {
-            $.ajax({
-                url: flipBookURL,
-                success: function (data) {
-                    window.flipBookPageLength = data.page_urls.length;
-
-                },
-                error: function (error) {
-                    window.flipBookPageLength = 0;
-
-                }
-            })
-
-        })(window);
-
+     })
     </script>
 
     <script type="text/javascript">
@@ -881,7 +886,7 @@
                         class: "img img-responsive"
                     })
 
-                    element.attr("style", "background-image:url(" + imageSrc + ")")
+                    // element.attr("style", "background-image:url(" + imageSrc + ")")
                 });
 
             }
@@ -1259,6 +1264,7 @@
             return bound;
         }
     </script>
+
 
 
 {% endblock script %}
