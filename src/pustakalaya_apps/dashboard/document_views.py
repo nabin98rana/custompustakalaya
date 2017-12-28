@@ -19,6 +19,8 @@ class AddDocumentView(SuccessMessageMixin, CreateView):
     model = Document
     success_url = reverse_lazy("dashboard:profile")
 
+
+
     # def get(self, request, *args, **kwargs):
     #     self.object = None
     #
@@ -167,7 +169,6 @@ class AddDocumentView(SuccessMessageMixin, CreateView):
             uploaded_file.document = self.object.pk
             uploaded_file.save()
 
-
         return HttpResponseRedirect(self.get_success_url())
 
     def form_invalid(self, form, document_file_upload_formset):
@@ -261,16 +262,17 @@ class UpdateDocumentView(SuccessMessageMixin, UpdateView):
 class DeleteDocumentView(SuccessMessageMixin, DeleteView):
     model = Document
     fields = [
-        'title',
-        'collections',
-        'document_file_type',
-        'languages',
-        'document_interactivity',
-        'publisher',
-        'keywords',
-        'document_series',
-        'document_type',
-        'license_type'
+    'title',
+    'collections',
+    'document_file_type',
+    'languages',
+    'document_interactivity',
+    'publisher',
+    'keywords',
+    'document_series',
+    'document_type',
+    'license_type'
+
     ]
 
     template_name = "dashboard/document/document_delete.html/"

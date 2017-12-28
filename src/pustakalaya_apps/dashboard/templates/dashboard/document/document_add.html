@@ -1,17 +1,20 @@
 {%  extends 'dashboard/base.html' %}
 {%  load crispy_forms_tags %}
 {%  block content %}
-{#    <div class="container">#}
-{#        <div class="col-md-8">#}
-{#            <form action="." method="post">#}
-{#             {% csrf_token %}#}
-{#            {{ form  | crispy }}#}
-{#             <!-- fileupload form -->#}
-{#                {{ document_file_upload_form | crispy }}#}
-{#              <input type="submit" value="Create Document" class="btn btn-primary">#}
-{#            </form>#}
-{#        </div>#}
-{#    </div>#}
+
+    {% comment %}
+    <div class="container">
+        <div class="col-md-8">
+            <form action="." method="post">
+             {% csrf_token %}
+            {{ form  | crispy }}
+             <!-- fileupload form -->
+                {{ document_file_upload_form | crispy }}
+              <input type="submit" value="Create Document" class="btn btn-primary">
+            </form>
+        </div>
+    </div>
+    {% endcomment %}
 
 
 

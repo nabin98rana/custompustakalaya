@@ -19,7 +19,6 @@ class ProfileForm(forms.ModelForm):
     #     model = UserProfile
     #     fields = ["first_name", "last_name", "phone_no", "user.username"]
 
-
 class DocumentForm(forms.ModelForm):
     class Meta:
         model = Document
@@ -63,7 +62,6 @@ class AudioFileUploadForm(forms.ModelForm):
 
 class VideoFileUploadForm(forms.ModelForm):
     pass
-
     class Meta:
         model = VideoFileUpload
         fields = ["file_name", "upload"]
