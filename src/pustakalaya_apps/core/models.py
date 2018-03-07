@@ -53,7 +53,9 @@ class Keyword(AbstractTimeStampModel):
     )
 
     keyword_description = models.TextField(
-        verbose_name=_("Keyword description")
+        verbose_name=_("Keyword description"),
+        blank=True,
+        default=""
     )
 
     def __str__(self):
@@ -69,10 +71,11 @@ class Biography(AbstractBaseAuthor):
     keywords = models.ManyToManyField(
         Keyword,
         verbose_name=_("Search Keywords"),
+        blank=True
     )
 
     def __str__(self):
-        return "{} {} {}".format(self.first_name, self.middle_name, self.last_name)
+        return self.name
 
     class Meta:
         db_table = "biography"

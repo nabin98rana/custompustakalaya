@@ -3,13 +3,15 @@ import uuid
 import time
 import os
 from django.contrib.contenttypes.fields import GenericRelation
+from django.contrib.auth.models import User
 from django.db import models
 from django.template.defaultfilters import slugify
 from django.utils.translation import ugettext as _
 from elasticsearch.exceptions import NotFoundError
 from hitcount.models import HitCount
 from hitcount.views import HitCountMixin
-
+from pustakalaya_apps.core.validators import validate_number
+from django.core import urlresolvers
 from pustakalaya_apps.collection.models import Collection
 from pustakalaya_apps.core.abstract_models import (
     AbstractItem,
@@ -37,7 +39,8 @@ def __file_upload_path(instance, filepath):
 
 class FeaturedItemManager(models.Manager):
     def get_queryset(self):
-        return super(FeaturedItemManager, self).get_queryset().filter(featured="yes").order_by("-updated_date")[:10]
+        return super(FeaturedItemManager, self).get_queryset().filter(featured="yes").order_by("-updated_date")[:5]
+
 
 class Document(AbstractItem, HitCountMixin):
     """Book document type to store book type item
@@ -46,7 +49,7 @@ class Document(AbstractItem, HitCountMixin):
 
     ITEM_INTERACTIVE_TYPE = (
         ("yes", _("Yes")),
-        ("no", _("No")),
+        # ("no", _("No")),
         ("NA", _("Not applicable")),
     )
 
@@ -92,7 +95,9 @@ class Document(AbstractItem, HitCountMixin):
     document_series = models.ForeignKey(
         "DocumentSeries",
         verbose_name=_("Series"),
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True
     )
 
     education_levels = models.ManyToManyField(
@@ -109,7 +114,9 @@ class Document(AbstractItem, HitCountMixin):
     document_interactivity = models.CharField(
         verbose_name=_("Interactive"),
         max_length=15,
-        choices=ITEM_INTERACTIVE_TYPE
+        choices=ITEM_INTERACTIVE_TYPE,
+        blank=True,
+        default="NA"
     )
 
     # This field should be same on all other model to make searching easy in search engine.
@@ -123,10 +130,12 @@ class Document(AbstractItem, HitCountMixin):
     #     verbose_name=_("Document Category")
     # )
 
-    document_total_page = models.PositiveIntegerField(
+    document_total_page = models.CharField(
         verbose_name=_("Total Pages"),
         blank=True,
-        default=0
+        default=0,
+        validators=[validate_number],
+        max_length=4
     )
 
     document_authors = models.ManyToManyField(
@@ -152,17 +161,24 @@ class Document(AbstractItem, HitCountMixin):
 
     publisher = models.ForeignKey(
         Publisher,
-        verbose_name=_("Publisher name")
+        verbose_name=_("Publisher name"),
+        blank=True,
+        null=True
     )
     # Better to have plural name
     keywords = models.ManyToManyField(
         Keyword,
-        verbose_name=_("Select list of keywords")
+        verbose_name=_("Select list of keywords"),
+        blank=True
+
+
     )
 
     thumbnail = models.ImageField(
         upload_to="uploads/thumbnails/document/%Y/%m/%d",
-        max_length=255
+        max_length=255,
+        blank=True,
+        help_text=_("maximum size of thumbnail should be 255px by 300px")
     )
 
     sponsors = models.ManyToManyField(
@@ -170,6 +186,12 @@ class Document(AbstractItem, HitCountMixin):
         verbose_name=_("Sponsor"),
         blank=True,
 
+    )
+
+    submitted_by = models.ForeignKey(
+        User,
+        editable=False,
+        null=True
     )
 
     # Manager to return the featured objects.
@@ -199,6 +221,7 @@ class Document(AbstractItem, HitCountMixin):
 
     def doc(self):
         """Create and return document object"""
+
         item_attr = super(Document, self).doc()
         document_attr = dict(
             **item_attr,
@@ -207,7 +230,7 @@ class Document(AbstractItem, HitCountMixin):
             communities=[collection.community_name for collection in self.collections.all()],
             collections=[collection.collection_name for collection in self.collections.all()],
             languages=[language.language.lower() for language in self.languages.all()],
-            publisher=self.publisher.publisher_name,
+            publisher=self.get_publisher_name,
             sponsors=[sponsor.name for sponsor in self.sponsors.all()],  # Multi value # TODO some generators
             keywords=[keyword.keyword for keyword in self.keywords.all()],
             # Document type specific
@@ -240,11 +263,27 @@ class Document(AbstractItem, HitCountMixin):
 
         return obj
 
+    @property
+    def get_publisher_name(self):
+        """
+        Method that return publisher name to index in elastic search server
+        If publisher name is None return empty string
+        :return:
+        """
+
+        if self.publisher is None:
+            return " "
+
+        return self.publisher.publisher_name
+
     def index(self):
         """index or update a document instance to elastic search index server"""
-        self.doc().save()
+        # Index to index server if any doc is not empty and published status is "yes"
+        if self.published == "yes":
+            self.doc().save()
 
     def bulk_index(self):
+        # Do bulk index if doc item is not empty.
         return self.doc().to_dict(include_meta=True)
 
     def delete_index(self):
@@ -258,6 +297,17 @@ class Document(AbstractItem, HitCountMixin):
         from django.urls import reverse
         return reverse("document:detail", kwargs={"title": slugify(self.title), "pk": self.pk})
 
+    def get_admin_url(self):
+        return urlresolvers.reverse("admin:%s_%s_change" %(self._meta.app_label, self._meta.model_name), args=(self.pk,))
+
+
+class UnpublishedDocument(Document):
+    """
+    This is the proxy model of Document,
+    Used in admin.py to display the list of unpublished document.
+    """
+    class Meta:
+        proxy = True
 
 class DocumentSeries(AbstractSeries):
     """BookSeries table inherited from AbstractSeries"""
@@ -282,6 +332,8 @@ class DocumentFileUpload(AbstractTimeStampModel):
     file_name = models.CharField(
         _("File name"),
         max_length=255,
+        blank=True,
+        default=""
     )
 
     document = models.ForeignKey(
@@ -300,10 +352,9 @@ class DocumentFileUpload(AbstractTimeStampModel):
         images = []
         for i in range(self.total_pages):
             path, file_name = os.path.split(self.upload.url)
-            images.append("{}/{}.png".format(path,i))
+            images.append("{}/{}.png".format(path, i))
 
-        return  images
-
+        return images
 
     def __str__(self):
         return self.file_name
@@ -325,6 +376,7 @@ class DocumentIdentifier(AbstractTimeStampModel):
     identifier_type = models.CharField(
         verbose_name=_("Identifier Type"),
         max_length=8,
+        blank=True,
         choices=(
             ("issn", _("ISSN")),
             ("ismn", _("ISMN")),

@@ -3,7 +3,9 @@
 <div class="col-md-12">
     {% for hit in response %}
         <ul class="list-unstyled">
-        <li class="media mb-3">
+        <li class="media mb-3"
+            onclick="window.location.href='{% url hit.type|add:":detail" hit.title|slugify hit.id %}'"
+             style="cursor:pointer;">
             <span class="mr-2">{{ forloop.counter }}.</span>
             <img class="mr-3 rounded" src="{{ MEDIA_URL }}{{ hit.thumbnail }}"
                  width="64px"
@@ -12,7 +14,7 @@
                  alt="{{ hit.title }}">
             <div class="media-body">
                 <p class="text-capitalize mt-0 mb-1">
-                    <a class="text-capitalize text-dark"
+                    <a class="text-capitalize text-dark bold-content"
                        href="{% url hit.type|add:":detail" hit.title|slugify hit.id %}">{{ hit.title }}</a>
                 </p>
                 <div class="text-dark text-capitalize">
@@ -33,9 +35,21 @@
 
                     </div>
                     {{ hit.abstract | truncatechars:"30" }}
+                      {%  if request.user.is_superuser %}
+
+                     <p class="  btn btn-sm btn-primary text-white pull-right">
+
+                       <a href='{% url "admin:"|add:hit.type|add:"_"|add:hit.type|add:"_change"  hit.id %}' class="text-white">
+                                    {% trans 'Edit' %}
+                       </a>
+
+                      </a>
+                     </p>
+
+                    {%  endif %}
                 </div>
                 <div class="rating">
-                    <span>☆</span><span>☆</span><span>☆</span><span>☆</span><span>☆</span>
+                    <!--<span>☆</span><span>☆</span><span>☆</span><span>☆</span><span>☆</span>-->
                 </div>
 
             </div>

@@ -34,18 +34,20 @@ urlpatterns = [
     # Hit count
     url(r'^hitcount/', include('hitcount.urls', namespace='hitcount')),
 
-]
+    # /review_input
+    url(r'^review_system/', include('pustakalaya_apps.review_system.urls', namespace="review_system")),
 
-# Enable i18n based urls
-urlpatterns += i18n_patterns(
-    # Search endpoint
-    url(r'^search/', include('pustakalaya_apps.pustakalaya_search.urls', namespace="search")),
+    # /review_delete
+    url(r'^review_system/delete/', include('pustakalaya_apps.review_system.urls', namespace="review_system_delete")),
 
-    # Browse endpoint url
-    url(r'^browse/', include('pustakalaya_apps.pustakalaya_search.browse_urls', namespace="browse")),
+    # /review_edi
+    url(r'^review_edit/edit/', include('pustakalaya_apps.review_system.urls', namespace="review_system_edit")),
 
-    # Homepage and core urls
-    url(r'^', include('pustakalaya_apps.core.urls', namespace="core")),
+    # /review_input
+    url(r'^favourite_collection/', include('pustakalaya_apps.favourite_collection.urls', namespace="favourite_collection")),
+
+    # /review_input
+    url(r'^favourite_collection/favourite_remove/',include('pustakalaya_apps.favourite_collection.urls', namespace="favourite_collection_remove")),
 
     # Document App
     # /documents/
@@ -58,6 +60,19 @@ urlpatterns += i18n_patterns(
     # Audio app
     # /audios/
     url(r'^audios/', include('pustakalaya_apps.audio.urls', namespace="audio")),
+
+]
+
+# Enable i18n based urls
+urlpatterns += i18n_patterns(
+    # Search endpoint
+    url(r'^search/', include('pustakalaya_apps.pustakalaya_search.urls', namespace="search")),
+
+    # Browse endpoint url
+    url(r'^browse/', include('pustakalaya_apps.pustakalaya_search.browse_urls', namespace="browse")),
+
+    # Homepage and core urls
+    url(r'^', include('pustakalaya_apps.core.urls', namespace="core")),
 
     # Community page aka category
     # /community/literatures-and-arts/
@@ -75,6 +90,7 @@ urlpatterns += i18n_patterns(
 
     # Ratings.
     url(r'^ratings/', include('star_ratings.urls', namespace='ratings')),
+
 
     # Wikipedia app
     # TODO:
@@ -129,6 +145,7 @@ urlpatterns += i18n_patterns(
         r'^forget-password/$', TemplateView.as_view(template_name="static_pages/forgetpassword.html"),
         name="forget-password"
     ),
+    prefix_default_language=True   ,
 )
 
 if settings.DEBUG:

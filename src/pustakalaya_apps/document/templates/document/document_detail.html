@@ -4,6 +4,7 @@
 {% load ratings %}
 {% load pustakalaya_filters %}
 {% load hitcount_tags %}
+{% load crispy_forms_tags %}
 
 <!-- override some css -->
 {% block style %}
@@ -17,13 +18,20 @@
             padding-left: 3px;
             border-top: 1px solid #dddddd;
         }
-
         .border-line span {
             display: inline-block;
             width: 300px;
-
         }
 
+    .jumbotron{
+      padding:5px 15px!important;
+    }
+      .add_to_favourite:hover{
+        background-color: #d63031 !important;
+      }
+    #added_to_favourite{
+      background-color: #d63031 ;
+    }
     </style>
 
 
@@ -34,31 +42,73 @@
         <div class="container min_height_document_detail  pt-4">
             <div class="row">
 
-                <div class="col-md-3 col-sm-12  col-xs-12">
-                    <!-- Logo -->
-                    <img class="img-responsive rounded w-100" height="300px" src="{{ MEDIA_URL }}{{ object.thumbnail }}"
+                <div class="col-md-3 col-sm-12  col-xs-12 ">
+
+                  {% if object.thumbnail  %}
+                  <img class="img-responsive rounded w-100" height="300px" src="{{ MEDIA_URL }}{{ object.thumbnail }}"
                          alt="{{ object.title }}" title="{{ object.title }}">
+                {% else %}
+                  <img class="img-responsive rounded w-100" height="300px" src="{% static 'base_assets/img/book_image_default.png' %}"
+                         alt="{{ object.title }}" title="{{ object.title }}">
+                  {% endif %}
+
+                    <!-- Logo -->
+
                     {% for document in object.documentfileupload_set.all %}
                            <div class="text-center">
                         <a href="{{ MEDIA_URL }}{{ document.upload }}" target="_blank"
-                           class="pull-left pr-5 pl-4 pt-2 pb-2 mt-2 mr-4 text-white bg-primary text-capitalize "><span class="fa fa-download"></span>&nbsp;{% trans 'download ' %}</a>
+                           class="pull-left pr-5 pl-4 pt-2 pb-2 mt-2 mr-4 text-white bg-primary text-capitalize "
+                        style="border-radius: 3px;"><span class="fa fa-download"></span>&nbsp;{% trans 'download ' %}</a>
+
 
 
                         {% if document.total_pages >= 1 %}
-                        <a class="pull-left ml-1 pr-5 pl-5 pt-2 pb-2 mt-2 text-white bg-primary text-capitalize" href="{% url 'document:flipbook' document.pk %}#viewCenter"><span class="fa fa-book"></span>&nbsp;{% trans 'read' %}</a>
+                        <a style="border-radius: 3px;" class="pull-left ml-1 pr-5 pl-5 pt-2 pb-2 mt-2 text-white bg-primary text-capitalize"
+                           href="{% url 'document:flipbook' document.pk %}#viewCenter"><span class="fa fa-book"></span>&nbsp;{% trans 'read' %}</a>
                         {% endif %}
                           </div>
 
 
-                        <p class="pull-left text-dark text-center mr-4 mt-3 ">
+                        <p class="pull-left text-dark text-center mr-4 mt-3 paragraph-font">
                             {% trans "File size: " %}{{ document.upload.size | file_size_format }}</p>
                     {% endfor %}
 
+
+
                     <!-- show count -->
-                    <p class="pull-left bg-blue text-dark text-center  mt-3">Views:<span>&nbsp;{{ hitcount.total_hits }}</span></p>
+                    <p class="pull-left bg-blue text-dark text-center paragraph-font mt-3">Views:<span>&nbsp;{{ hitcount.total_hits }}</span></p>
+                  <br><br><br><br>
                     <!-- Rating -->
+                 {%  if request.user.is_superuser %}
+
+                     <p class="text-primary description">
+                      <a href="{{ object.get_admin_url }}">{%  trans "Edit" %}</a>
+                     </p>
+
+                    {%  endif %}
+
 
                     {% ratings object %}
+
+
+                  <!--For favourite collection-->
+                  <span id="favourite_hanging_place">
+                    {% if  request.user.is_authenticated %}
+                     {% if favourite_data.first.user != "" %}
+
+                      {% if request.user == favourite_data.first.user %}
+                       <button type="button" class="btn btn-sm" value="{{object.pk }}" id="added_to_favourite">Added to favourite <i class="fa fa-check-circle"></i></button>
+
+                      {% else %}
+                      <button type="button" value="{{ object.pk  }}" class="btn  bg-dark btn-sm add_to_favourite" >Add to favourite <i class="fa fa-heart"></i></button>
+
+                      {% endif %}
+                  {% else %}
+                  <button type="button" value="{{ object.pk  }}" class="btn  bg-dark btn-sm add_to_favourite" >Add to favourite <i class="fa fa-heart"></i></button>
+
+                  {% endif %}
+                    {% endif %}
+                </span>
                     <!-- share buttons section -->
                     <section class="pull-left share-buttons text-center">
                         <a class="share-facebook p-1 btn btn-md bg-white"
@@ -89,14 +139,19 @@
 
                 <div class="col-md-9 col-sm-12 col-xs-12">
                     <!-- title of a document -->
-                    <h4 class="text-capitalize h4 lead mt-0 pt-0 description text-dark">{{ object.title }}</h4>
+
+                    <h4 class="text-capitalize h4 lead mt-0 pt-0 description text-dark">
+
+                        {{ object.title }}
+                    </h4>
                     <!-- author section -->
-                    <div class="pb-1">
+                    <div class="pb-1 ">
                         <!-- Authors -->
                         <!-- TODO pluralization -->
                         <!--strong class="text-capitalize font-weight-normal">{% trans "Authors:" %}</strong-->
                         {% for author in object.document_authors.all %}
                             <a href="{% url 'author:author_detail' author.getname|slugify author.pk %}"><span
+                                    style="font-size: 20px;"
                                     class="text-dark text-capitalize text-primary">
                                 {{ author }}
                                 {% if forloop.counter != object.document_authors.count %}|{% endif %}
@@ -121,7 +176,7 @@
                     <!-- abstract of a document -->
                     <div>
 
-                        <span class="text-justify text-dark"
+                        <span class="text-justify text-dark paragraph-font"
                                 {% if not object.abstract %}
                               style="display: none"
                                 {% endif %}>
@@ -131,7 +186,7 @@
 
                     <br>
                     <!-- Metadata section -->
-                    <div class="row">
+                    <div class="row paragraph-font">
                         <!-- Left half section -->
                         <div class="col-md-12 col-sm-12 col-xs-12">
 
@@ -178,6 +233,7 @@
 
 
                             <!-- publisher section -->
+                            {%  if not object.publisher or object.publisher == "_" %}
                             <div class="pb-1 border-line"
                                     {% if not object.publisher %}
                                  style="display: none;"
@@ -186,6 +242,7 @@
                                 <span class="text-dark text-capitalize"> {{ object.publisher }}</span>
 
                             </div>
+                        {%  endif %}
 
                             <!-- place of publication -->
                             <div class="pb-1 border-line"
@@ -200,42 +257,51 @@
 
                             <!-- Publication year -->
                             <div class="pb-1 border-line"
-                                    {% if not object.publication_year %}
+                                    {% if not object.year_of_available_on_text %}
                                  style="display: none;"
                                     {% endif %}>
                                 <span class="text-capitalize font-weight-normal text-dark">{% trans "publication year:" %}</span>
-                                <span class="text-dark text-capitalize"> {{ object.publication_year }}</span>
+                                <span class="text-dark text-capitalize"> {{ object.year_of_available_on_text }}</span>
 
 
                             </div>
 
                             <!-- Available year -->
                             <div class="pb-1 border-line"
-                                    {% if not object.created_date %}
+                                    {% if not object.year_of_available_on_text %}
                                  style="display: none;"
                                     {% endif %}>
 
                                 <span class="text-capitalize font-weight-normal text-dark">{% trans "available year:" %}</span>
-                                <span class="text-dark text-capitalize"> {{ object.created_date }}</span>
+                                <span class="text-dark text-capitalize"> {{ object.year_of_available_on_text }}</span>
 
                             </div>
 
                             <!-- Keywords -->
+                            {%  if object.keywords  %}
                             <div class="pb-1 border-line">
 
                                 <!-- TODO pluralization -->
-                                <span class="text-capitalize font-weight-normal text-dark">{% trans "keywords:" %}</span>
-                                {% for keyword in object.keywords.all %}
+                                <span class="text-capitalize font-weight-normal text-dark" style="vertical-align: top;">{% trans "keywords:" %}</span>
 
-                                    <span class="text-dark text-capitalize"> <a
+                              <span class="text-dark text-capitalize">
+                               {% for keyword in object.keywords.all %}
 
-                                            href="{% url 'keyword:keyword_detail' keyword.keyword %}">{{ keyword.keyword| transtolocal }}</a></span>
+                                      <a href="{% url 'keyword:keyword_detail' keyword.keyword %}" class="mr-2">
+                                          {{ keyword.keyword| transtolocal }}&nbsp;{%  if not forloop.last %}
+                                            ,
+                                        {%  endif %}
+
+                                      </a>
 
 
                                 {% endfor %}
+                              </span>
+
 
 
                             </div>
+                             {%  endif  %}
 
                             <!-- Description -->
                             <div class="pb-1 border-line"
@@ -255,6 +321,7 @@
                                 <span class="text-dark text-capitalize"> {{ object.license_type }}</span>
                             </div>
 
+                            {%  if not object.document_series or object.document_series == "_" %}
                             <!-- document series -->
                             <div class="pb-1 border-line">
                                 <!-- Add 2px right margin in each -->
@@ -262,12 +329,14 @@
                                 <span class="text-dark text-capitalize">{{ object.document_series }}</span>
                             </div>
 
+                            {%  endif %}
+
                             <!-- document edition -->
                             <div class="pb-1 border-line"
                                     {% if not object.edition %}
                                  style="display: none;"
                                     {% endif %}>
-                                <span class="capitalize text-dark text-capitalize">{% trans "edition:" %}</span>
+                                <span class="capitalize text-dark font-weight-normal text-capitalize">{% trans "edition:" %}</span>
                                 <span class="text-dark">
                                     {{ object.edition }}
                                 </span>
@@ -278,7 +347,7 @@
                                     {% if not object.volume %}
                                  style="display: none;"
                                     {% endif %}>
-                                <span class="capitalize text-dark text-capitalize">{% trans "volume:" %}</span>
+                                <span class="capitalize font-weight-normal text-dark text-capitalize">{% trans "volume:" %}</span>
                                 <span class="text-dark">{{ object.volume }}</span>
                             </div>
 
@@ -288,7 +357,7 @@
                                     {% if not object.documentidentifier.identifier_id %}
                                  style="display: none"
                                     {% endif %}>
-                                <span class="capitalize text-dark text-capitalize">{{ object.documentidentifier.identifier_type }}:</span>
+                                <span class="capitalize text-dark font-weight-normal text-capitalize">{{ object.documentidentifier.identifier_type }}:</span>
                                 <span class="text-dark">{{ object.documentidentifier.identifier_id }}</span>
                             </div>
 
@@ -298,23 +367,23 @@
                                  style="display: none;"
                                     {% endif %}>
                                 <!-- TODO: implement pluralization in total page -->
-                                <span class="text-capitalize text-dark text-capitalize">{% trans "total pages" %}:</span>
+                                <span class="text-capitalize text-dark font-weight-normal text-capitalize">{% trans "total pages" %}:</span>
                                 <span class="text-dark"> {{ object.document_total_page }}</span>
                             </div>
 
                             <!-- Language -->
                             <div class="pb-1 border-line">
                                 <!-- TODO: implement pluralization in total page -->
-                                <span class="text-capitalize hidden text-dark text-capitalize">{% trans "languages" %}:</span>
+                                <span class="text-capitalize font-weight-normal hidden text-dark text-capitalize">{% trans "languages" %}:</span>
                                 {% for language in object.languages.all %}
-                                    <span class="text-dark"> {{ language }}</span>
+                                    <span class="text-dark "> {{ language }}</span>
                                 {% endfor %}
                             </div>
 
                             <!-- Education level -->
                             <div class="pb-1 border-line">
                                 <!-- TODO: implement pluralization in total page -->
-                                <span class="text-capitalize hidden text-dark text-capitalize">{% trans "education levels" %}:</span>
+                                <span class="text-capitalize font-weight-normal hidden text-dark text-capitalize">{% trans "education levels" %}:</span>
                                 {% for education_level in object.education_levels.all %}
                                     <span class="text-dark"> {{ education_level }}</span>
                                 {% endfor %}
@@ -323,16 +392,18 @@
                             </div>
 
                             <!-- Interactivity -->
+                            {%  if not object.document_interactivity or object.document_interactivity is "NA"  %}
                             <div class="pb-1 border-line">
                                 <!-- TODO: implement pluralization in total page -->
-                                <span class="text-capitalize hidden text-dark text-capitalize">{% trans "interactivity" %}:</span>
+                                <span class="text-capitalize font-weight-normal hidden text-dark text-capitalize">{% trans "interactivity" %}:</span>
                                 <span class="text-dark"> {{ object.document_interactivity }}</span>
                             </div>
+                            {%  endif %}
 
 
                             <!-- Rights -->
                             <div class="pb-1 border-line" {% if not object.custom_license %} style="..." {% endif %}>
-                                <span class="text-capitalize font-weight-normal text-dark">{% trans "right:" %}</span>
+                                <span class="text-capitalize font-weight-normal text-dark">{% trans "rights:" %}</span>
                                 <span class="text-dark text-capitalize"
                                       style="vertical-align: top;"> {{ object.custom_license }}</span>
                             </div>
@@ -351,30 +422,318 @@
                         </div>
 
                     </div>
+                    <br>
+                  <!--Review system added-->
+                   <div class="container" style="margin-left:-27px;">
+
+                     <div class="form-group">
+                       <div class="container" >
+
+                         <input type="hidden" name="content_type" value="document"/>
+                         <input type="hidden" name="content_id" value="{{ object.pk }}">
+
+                         <label>Your review message:</label>
+                         <textarea type="text" name="input" class="form-control bg-white" placeholder="Your review message"></textarea>
+                         <button type="button" value="Submit" id="submitButton" class ="btn btn-primary" >Add your review</button>
+
+                       </div>
+                     </div>
+
+                     <div class="container"  style="margin-left:-40px !important;" id="commentContainer">
+                       <!--comment system views -->
+                       <ul>
+                       {% if user %}
+                       <input type="hidden" name="user" value="{{ user }}">
+                       {% endif %}
+
+                       {% if data_review %}
+
+                         {% for v in data_review %}
+                         <li style="list-style: none" id ="comment_{{ v.pk }}">
+
+                           <div class="jumbotron" id="div_comment_{{ v.pk }}">
+                              <p class="font-weight-bold input_post" style="word-wrap: break-word;">
+                                {{ v.post }}
+                                </p>
+                              <p>
+                                <small class="text-capitalize"> by: {{  v.user }}</small>
+                              </p>
+
+                               {% if user == v.user %}
+                                <!--<p>Welcome, {{ user.get_username }}. Thanks for logging <in class=""></in></p>-->
+
+                                 <button type="button" value="{{ v.pk }}"  class ="btn btn-sm btn-primary font-weight-bold EditComment">Edit</button>
+                                 <button type="button" value="{{ v.pk }}"  class ="btn btn-sm btn-warning font-weight-bold DeleteComment">Delete</button>
+
+                                  {% else %}
+                                    <!--<p>Welcome,  user. Please log in.</p>-->
+                              {% endif %}
+                           </div>
+                         </li>
+                         {% endfor %}
+
+
+                        {% endif %}
+                        </ul>
+                     </div>
+                    <!--model for login message -->
+                   </div>
+
                 </div>
             </div>
+
         </div>
     </div>
    </div>
 
+<br><br><br>
+
+<!-- css scripts for book rating -->
+<link rel="stylesheet" href="{% static 'star-ratings/css/star-ratings.css' %}">
 {% endblock content %}
 
 
 
 
+{% block script %}
+<!--<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>-->
+{{ block.super }}
+<script>
+
+    //--for the review system
+    $("#submitButton").click(function (e){
+      e.preventDefault();
+      var user_input = $("textarea[type='text'][name='input']").val().trim();
+      var content_type = $("input[type='hidden'][name='content_type']").val().trim();
+      var content_id = $("input[type='hidden'][name='content_id']").val().trim();
+      var user_name = $("input[type='hidden'][name='user']").val().trim();
+      if(user_name == "" || user_name == "AnonymousUser" ){
+        alert("Login to post you message");
+        return;
+      }else if(user_input == "" ){
+        alert("Please enter you message first");
+        return;
+      }
+       $.ajax({
+        type:'post',
+        url: '/review_system/',
+         headers: {
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+        data: {
+          "input": user_input,
+          "content_type" : content_type,
+          "content_id" : content_id,
+        },
+        success: function (data) {
+          $("textarea[type='text'][name='input']").val('');
+          var pk_value = data.pk_value;
+          //when success we need to append the data to the comment section
+      $("#commentContainer ul").append(''+
+                          '<li style="list-style: none" id ="comment_'+ pk_value +'">'+
+                          ' <div class="jumbotron" id="div_comment_'+ pk_value +'"> '+
+                          ' <p class="font-weight-bold input_post" style="word-wrap: break-word;"> '+
+                            user_input +
+                            '</p>'+
+                            '<p>' +
+                            '<small class="text-capitalize"> by:' +  user_name +'</small>'+
+                            '</p>'+
+                            '<button type="button" value="'+ pk_value +'"  class ="btn btn-sm btn-primary font-weight-bold EditComment">Edit</button>'+
+                            '<button type="button" value="'+ pk_value +'"  class ="btn btn-sm btn-warning font-weight-bold DeleteComment">Delete</button>'+
+                            '</div>'+
+                            '</li>');
+        },
+            error: function (data) {
+                console.log('An error occurred.');
+                console.log(data);
+            },
+      });
+    });
+    $("#commentContainer ul").delegate("button.EditComment","click",function (e){
+      if($("#editSection").length){
+        return;
+      }
+      var pk_value = $(this).val();
+      //lets grab the editing values first
+      var idval= "#comment_"+pk_value +"  .jumbotron .input_post";
+      var editText =  $(idval).text();
+      $(idval).append('<div id="editSection">'+
+        '<p>Edited Message is: </p>'+
+        '<textarea type="text" name="editedContent" placeholder="'+ $.trim(editText) +'" value="'+$.trim(editText)+'" class="form-control bg-white">'+$.trim(editText)+'</textarea>'+
+        '<button type="submit"  class="btn btn-sm btn-primary editButtonGo" value="'+ pk_value +'" style="color:white;background:blue;">Go</button>'+
+        '<button type="submit"  class="btn btn-sm btn-primary editButtonCancel" style="color:white;background:blue;">Cancel</button>'+
+        '</div>'
+      );
+    });
+
+    //this one is for delete
+  $("#commentContainer ul").delegate("button.DeleteComment","click",function (e){
+      var pk_value = $(this).val();
+      console.log(pk_value);
+       $.ajax({
+        type:'post',
+        url: '/review_system/delete/',
+         headers: {
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+        data: {
+          "input_pk": pk_value,
+        },
+        success: function (data) {
+          //if (data.is_taken) {
+          //alert('SUCCESS');
+            //alert("data = "+ data);
+          //}
+          var id = "#comment_"+pk_value
+          $(id).remove();
+        },
+            error: function (data) {
+                console.log('An error occurred.');
+                console.log(data);
+            },
+      });
+    });
+
+  //cancel button click
+  $("#commentContainer ul").delegate("button.editButtonCancel","click",function (e){
+    $("#editSection").remove();
+  });
+
+  //button go
+  $("#commentContainer ul").delegate("button.editButtonGo","click",function (e){
+
+   //data capture
+      var user_input = $("textarea[type='text'][name='editedContent']").val().trim();
+      var content_type = $("input[type='hidden'][name='content_type']").val().trim();
+      var content_id = $("input[type='hidden'][name='content_id']").val().trim();
+      var user_name = $("input[type='hidden'][name='user']").val().trim();
+      var pk_value = $(".editButtonGo").val();
+      //alert("pk="+pk_value);
+      //return;
+      if(user_name == "" || user_input == "" ){
+        return;
+      }
+       $.ajax({
+        type:'post',
+        url: '/review_system/edit/',
+         headers: {
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+        data: {
+          "input": user_input,
+          "content_type" : content_type,
+          "content_id" : content_id,
+          "pk_val":pk_value,
+        },
+        success: function (data) {
+          $("textarea[type='text'][name='input']").val('');
+
+          var pk_value = data.pk_value;
+          var id_div = "div_comment_"+pk_value ;
+          $("#"+id_div).remove();
+          //when success we need to append the data to the comment section
+         var id_list = "#comment_"+pk_value;
+        $("#commentContainer ul li"+ id_list).append(''+
+                          ' <div class="jumbotron " id="'+id_div+'" > '+
+                          ' <p class="font-weight-bold input_post" style="word-wrap: break-word;"> '+
+                            user_input +
+                            '</p>'+
+                            '<p>' +
+                            '<small class="text-capitalize"> by:' +  user_name +'</small>'+
+                            '</p>'+
+                            '<button type="button" value="'+ pk_value +'"  class ="btn btn-sm btn-primary font-weight-bold EditComment">Edit</button>'+
+                            '<button type="button" value="'+ pk_value +'"  class ="btn btn-sm btn-warning font-weight-bold DeleteComment">Delete</button>'+
+                            '</div>'+
+                            '');
+        },
+            error: function (data) {
+                console.log('An error occurred.');
+                console.log(data);
+            },
+      });
+  });
 
 
+  //for favourite likes #favourite_hanging_place
+  $("#favourite_hanging_place").delegate("button.add_to_favourite","click",function (e){
+      e.preventDefault();
+      var user_input = "checked";
+
+      var content_type = $("input[type='hidden'][name='content_type']").val().trim();
+      var content_id = $("input[type='hidden'][name='content_id']").val().trim();
+      var user_name = $("input[type='hidden'][name='user']").val().trim();
+      //alert("some value");
+      //return;
+      if(user_name == "" || user_name == "AnonymousUser" ){
+        alert("Login to add to your favourite");
+        return;
+      }
+       $.ajax({
+        type:'post',
+        url: '/favourite_collection/',
+         headers: {
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+        data: {
+          "input": user_input,
+          "content_type" : content_type,
+          "content_id" : content_id,
+        },
+        success: function (data) {
+          $('.add_to_favourite').remove();
+           $("#favourite_hanging_place").append(''+
+                           '<button type="button" class="btn btn-sm" value="'+ content_id +'" id="added_to_favourite">Added to favourite <i class="fa fa-check-circle"></i></button>'
+                      +'');
+
+        },
+            error: function (data) {
+                console.log('An error occurred.');
+                console.log(data);
+            },
+      });
+    });
+
+  //Added_favourite , remove form favourite now
+   $("#favourite_hanging_place").delegate(" #added_to_favourite","click",function (e){
+      e.preventDefault();
+      var user_input = "unchecked";
+
+      var content_type = $("input[type='hidden'][name='content_type']").val().trim();
+      var content_id = $("input[type='hidden'][name='content_id']").val().trim();
+      var user_name = $("input[type='hidden'][name='user']").val().trim();
+      if(user_name == "" || user_name == "AnonymousUser" ){
+        alert("Login to add to your favourite");
+        return;
+      }
+       $.ajax({
+        type:'post',
+        url: '/favourite_collection/favourite_remove/',
+         headers: {
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+        data: {
+          "input": user_input,
+          "content_type" : content_type,
+          "content_id" : content_id,
+        },
+        success: function (data) {
+          $("#added_to_favourite").remove();
+          $("#favourite_hanging_place")
+
+           $("#favourite_hanging_place").append(''+
+                           '<button type="button" value="'+ content_id +'" class="btn  bg-dark btn-sm add_to_favourite" >Add to favourite <i class="fa fa-heart"></i></button>'
+               +'');
+
+        },
+            error: function (data) {
+                console.log('An error occurred.');
+                console.log(data);
+            },
+      });
+    });
 
 
+</script>
 
 
-
-
-
-
-
-
-
-
-
-
+{% endblock script %}

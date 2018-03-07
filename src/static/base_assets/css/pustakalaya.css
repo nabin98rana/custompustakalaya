@@ -1,5 +1,3 @@
-
-
 #browse > p > a {
     text-decoration: none;
     color: #86AFC6;
@@ -25,7 +23,7 @@ a, u {
 
  }
 /*added by bhoj*/
-/*//////////////////////////////
+/*/////////////////////////////
 /////////Added by Bhoj////////
 /////////////////////////////
 */
@@ -58,7 +56,9 @@ padding-left:4px;
 
 }
 
-
+.bold-content{
+font-weight:500;
+}
   .box-model{
     border: 1px solid #3498db;
     border-radius: 5px;
@@ -78,17 +78,19 @@ padding-left:4px;
   padding-left:5px;
   font-size:15px;
   }
-  .paragraph-font,.paragraph-font>a{
-  font-size:15px;
-  }
+.paragraph-font,.paragraph-font>a{
+      font-size:15px;
+      font-weight: 500;
+}
 
-  .title-font{
-  font-size:16px;
-  font-weight:bold;
-  }
-  .bold{
-  font-weight:bold;
-  }
+.title-font{
+    font-size:15px;
+    font-weight: 500!important;
+
+}
+  /*.bold{*/
+  /*font-weight:bold;*/
+  /*}*/
   .author-name-size{
   font-size: 12px;
   }
@@ -101,6 +103,8 @@ padding-left:4px;
       .thumbnail-box-shadow:hover {
             box-shadow:0 0 25px #7f8c8d;
       }
+
+
 
       .android-box-shadow:hover {
             box-shadow:0 0 25px #7f8c8d;

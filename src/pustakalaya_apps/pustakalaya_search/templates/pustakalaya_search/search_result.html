@@ -13,7 +13,7 @@
     "communities":
     "collection":
     "keywords":
-    "year_of_available":
+    "year_of_available":ok_
     "license_type":
     "publication_year":
 
@@ -76,6 +76,7 @@
             margin: 0px 0px 5px 5px;
             /* here I can control the spacing */
             padding: 5px;
+            color: #006596 !important;
         }
 
         .grid li {
@@ -84,6 +85,7 @@
             background-color: #ececec;
             margin-bottom: 10px;
             border-radius: 2px;
+            margin-right: 19px;
         }
 
         li img {
@@ -109,19 +111,32 @@
 
         .grid > li > img {
             box-shadow: 4px 4px 4px #888;
-            height: 250px !important;
+            height: 224px !important;
             border-radius: 3px;
 
         }
 
         .grid > li > p {
 
-            padding-top: 5px;
+            padding: 5px;
+            padding-top:15px;
+            text-overflow: ellipsis;
+            width: 10px;
+            width: 170px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            color: #006596 !important;
+        }
+
+        .grid > li > p:hover {
+            text-decoration: underline;
         }
 
         .list > li > p {
             display: inline-block !important;
             vertical-align: top;
+            color: #006596 !important;
 
         }
 
@@ -139,6 +154,14 @@
         .grid > li > div.list-abstract {
             display: none;
         }
+ @media screen and (max-width: 765px) and (min-width: 50px)
+    {   /*small device (sd)*/
+
+     .small-device-hide-button{
+     display:none;
+     }
+
+     }/*close of small device*/
 
 
     </style>
@@ -148,11 +171,11 @@
 
 {% block content %}
     <div class="for-bg-color-container pt-4">
-        <div class="container" style="min-height: 430px">
+        <div class="container min_height_document_detail">
             <!-- Result container -->
             {% if hits %}
                 <div class="row">
-                <div class="col-md-3  col-sm-12 col-xs-12" id="facet">
+                <div class="col-md-3  col-sm-12 col-xs-12" id="facet" style="padding-right:0px;">
                     <!-- Facets List -->
                     <!-- type facets -->
                     {% if type %}
@@ -188,6 +211,7 @@
                                     var keywords = "{{keywords_js|escapejs}}"
 
                                 </script>
+
 
                                 <!-- vue template to implement filters in vuejs -->
                                 <div id="keywords-filter" class="mr-5">
@@ -240,6 +264,33 @@
                                 {% endif %}
                             </div><!-- end col-sm-12 -->
                         </div>
+
+                  <!-- some script above here -->
+                              <!-- vue js implement -->
+                              <script src="{% static 'base_assets/js/vue/vue.js' %}"></script>
+                              <!-- vuejs app -->
+                              <script>
+                                  var app = new Vue({
+                                      el: "#keywords-filter",
+                                      delimiters: ["<%", "%>"],
+                                      data: function () {
+                                          return {
+                                              search: '',
+                                              keywords: JSON.parse(keywords).keywords
+                                          };
+                                      },
+                                      computed: {
+                                          filteredKeywords: function () {
+                                              var self = this;
+                                              return this.keywords.filter(function (keyword) {
+                                                  return keyword.keyword.toLowerCase().indexOf(self.search.toLowerCase()) >= 0;
+                                              });
+                                              //return this.customers;
+                                          },
+                                      }
+                                  });
+
+                              </script>
                     {% endif %}
 
                     <!-- Language facets -->
@@ -391,13 +442,13 @@
                 </div>
 
                 <!-- Results -->
-                <div class="col-md-9 col-sm-12">
+                <div class="col-md-9 col-sm-12" style="padding-left:0px;">
 
                     <div>
                         <!-- include search form -->
-                        <form method="GET" action="/search" id="searchForm">
+                        <form method="GET" action="/search" id="searchForm1">
 
-                            <div class="input-group bg-white">
+                            <div class="input-group bg-white" style="display:none;">
                                 <input class="form-control" id="search_input"
                                        autocomplete="off"
                                        maxlength="200"
@@ -420,17 +471,35 @@
 
                     <!--grid view list view section-->
                     <div id="container">
-                        <div class="buttons">
-                            <button class="grid  fa fa-th text-primary"></button>
-                            <button class="list fa fa-list text-primary"></button>
+                        <div class="ml-3 mb-3 buttons">
+                            <button class="grid btn btn-dark btn-sm fa fa-th text-white small-device-hide-button" role="link" style="background:#006596 !important"></button>
+                            <button class="list fa fa-list text-white btn btn-dark btn-sm" style="background:#006596 !important"></button>
                         </div>
                         <ul class="list clearfix">
                             {% for hit in hits %}
-                                <li style="position: relative; cursor: pointer"
-                                    onclick='window.location.href="{% url hit.type|add:':detail' hit.title|slugify hit.id %}"'>
-                                    <img class="shadow" src="{{ MEDIA_URL }}{{ hit.thumbnail }}"/>
-                                    <p class="text-primary description lead">
-                                        {{ hit.title }}
+
+                           <li style="position: relative; cursor: pointer" onclick='window.location.href="{% url hit.type|add:':detail' hit.title|slugify hit.id %}"'>
+
+                          {% if hit.thumbnail  %}
+
+                          <img class="shadow" src="{{ MEDIA_URL }}{{ hit.thumbnail }}"/>
+                          {% else %}
+                           {% if hit.type == "document"%}
+                            <img class="shadow" src="{% static 'base_assets/img/book_image_default.png' %}"/>
+                           {% elif hit.type == "audio"%}
+                            <img class="shadow" src="{% static 'base_assets/img/audio_book.png' %}"/>
+
+                           {% else %}
+                                        <img class="shadow" src="{% static 'base_assets/img/video_book.png' %}"/>
+                            {% endif %}
+
+                            {% endif %}
+                                            <!--<a href="#">-->
+
+                                  <p class="text-primary description lead" id="_itemTitle">
+                                    <a href="{% url hit.type|add:':detail' hit.title|slugify hit.id %}">
+                                    {{ hit.title}}
+                                      </a>
                                     </p>
 
                                     <div class="list-abstract text-dark ">{{ hit.abstract|truncatechars:232 }}
@@ -441,6 +510,7 @@
 
 
                                 </li>
+
                             {% endfor %}
                         </ul>
                         <div class="row">
@@ -503,8 +573,8 @@
                     <div class="row min_height">
                         <div class="col-md-2"></div>
                         <div class=" col-md-8 search">
-                            <p class="text-capitalize text-danger text-center">{% trans "result not found" %}</p>
-                            {% include "_partials/search_form.html" %}
+                            <p class="text-capitalize text-danger text-center">{% trans "result not found for" %}&nbsp; <span class="text-primary">{{q}}<span></span></p>
+                            <!--{% include "_partials/search_form.html" %}-->
 
                         </div>
                         <div class="col-md-2"></div>
@@ -597,42 +667,17 @@
             }
 
             // set the hidden field value
-            $('#searchForm, #filterData').val(JSON.stringify(filters));
+            $('#searchForm1, #filterData').val(JSON.stringify(filters));
 
             // Submit the form.
 
-            $("#searchForm").submit();
+            $("#searchForm1").submit();
 
 
         }
 
     </script>
-    <!-- some script above here -->
-    <!-- vue js implement -->
-    <script src="{% static 'base_assets/js/vue/vue.js' %}"></script>
-    <!-- vuejs app -->
-    <script>
-        var app = new Vue({
-            el: "#keywords-filter",
-            delimiters: ["<%", "%>"],
-            data: function () {
-                return {
-                    search: '',
-                    keywords: JSON.parse(keywords).keywords
-                };
-            },
-            computed: {
-                filteredKeywords: function () {
-                    var self = this;
-                    return this.keywords.filter(function (keyword) {
-                        return keyword.keyword.toLowerCase().indexOf(self.search.toLowerCase()) >= 0;
-                    });
-                    //return this.customers;
-                },
-            }
-        });
 
-    </script>
 
     <script>
 
@@ -668,7 +713,6 @@
                 $('#keywords-filter #myList').each(function () {
                     return $(this).addClass('hideItem')
                 })
-                console.log('x=' + x + ' , i = ' + i);
                 $('#keywords-filter #myList').each(function () {
                     if (i < x) {
                         i++;
@@ -735,11 +779,41 @@
     <script type="text/javascript">
         $('button').on('click', function (e) {
             if ($(this).hasClass('grid')) {
+                // In case of grid view. Trim the title
                 $('#container ul').removeClass('list').addClass('grid');
+
+
             } else if ($(this).hasClass('list')) {
                 $('#container ul').removeClass('grid').addClass('list');
-                            }
+                // In case of list view restore the title text.
+                $("#_itemTitle").text(itemTitle)
+
+            }
         });
+
     </script>
 
+<script>
+
+
+function getUrlVars()
+{
+    var vars = [], hash;
+    var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+    for(var i = 0; i < hashes.length; i++)
+    {
+        hash = hashes[i].split('=');
+        vars.push(hash[0]);
+        vars[hash[0]] = hash[1];
+    }
+    return vars;
+}
+var x = getUrlVars();
+$('.sbx-google__wrapper ').children('input.sbx-google__input-placeholder').attr("placeholder","");
+$('.sbx-google__wrapper ').children('input[name="qar"]').val(x["q"]);
+</script>
+
+
 {% endblock script %}
+
+

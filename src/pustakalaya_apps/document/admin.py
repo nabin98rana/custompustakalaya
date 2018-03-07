@@ -1,7 +1,9 @@
+from  django.utils.html import format_html
 from django.contrib import admin
 
 from .models import (
     Document,
+    UnpublishedDocument,
     DocumentSeries,
     DocumentFileUpload,
     DocumentLinkInfo,
@@ -12,6 +14,7 @@ from .models import (
 class DocumentFileUploadInline(admin.TabularInline):
     model = DocumentFileUpload
     extra = 1
+    fields = ["upload"]
 
 
 class DocumentLinkInfoAdminInline(admin.TabularInline):
@@ -24,6 +27,15 @@ class DocumentIdentifierAdmin(admin.StackedInline):
     extra = 1
     max_num = 1
 
+@admin.register(DocumentSeries)
+class DocumentSeriesAdmin(admin.ModelAdmin):
+    pass
+
+
+@admin.register(UnpublishedDocument)
+class UnpublishedDocumentAdmin(admin.ModelAdmin):
+    def get_queryset(self, request):
+        return  self.model.objects.filter(published="no")
 
 @admin.register(Document)
 class DocumentAdmin(admin.ModelAdmin):
@@ -52,8 +64,8 @@ class DocumentAdmin(admin.ModelAdmin):
         "document_illustrators",
         "place_of_publication",
         "publisher",
-        "publication_year",
-        "year_of_available",
+        "publication_year_on_text",
+        "year_of_available_on_text",
         "keywords",
         "document_series",
         "volume",
@@ -68,8 +80,26 @@ class DocumentAdmin(admin.ModelAdmin):
         "thumbnail",
     )
 
+    list_display = ['title', 'published','featured', 'preview_link', 'updated_date', 'submitted_by']
 
-@admin.register(DocumentSeries)
-class DocumentSeriesAdmin(admin.ModelAdmin):
-    def get_model_perms(self, request):
-        return {}
+    ordering = ('-updated_date',)
+
+
+    list_filter = ['published', 'title','featured']
+
+    list_per_page = 10
+
+    def save_model(self, request, obj, form, change):
+        """Override the submitted_by field to admin user
+        save_model is only called when the user is logged as an admin user.
+        """
+        if obj.submitted_by is None:
+            obj.submitted_by = request.user
+        super().save_model(request, obj, form, change)
+
+    def preview_link(self, obj):
+        return format_html("<a href='{url}'>Preview</a>", url=obj.get_absolute_url())
+
+
+
+
